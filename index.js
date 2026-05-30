@@ -1,6 +1,9 @@
 const express=require("express");
 const bodyParser=require("body-parser");
 const path=require("path");
+const cookieSession=require("cookie-session");
+const passport=require("passport");
+const LocalStrategy=require("passport-local").Strategy;
 const modelo=require("./servidor/modelo.js");
 
 const app=express();
@@ -9,6 +12,23 @@ const PORT=process.env.PORT||3000;
 app.use(express.static(path.join(__dirname,"cliente")));
 app.use(bodyParser.urlencoded({extended:true}));
 app.use(bodyParser.json());
+
+app.use(cookieSession({
+    name:"session",
+    keys:[process.env.SESSION_SECRET||"secreto"],
+    maxAge:24*60*60*1000
+}));
+app.use(function(req,res,next){
+    if(req.session && !req.session.regenerate){
+        req.session.regenerate=function(cb){ cb(); };
+    }
+    if(req.session && !req.session.save){
+        req.session.save=function(cb){ cb(); };
+    }
+    next();
+});
+app.use(passport.initialize());
+app.use(passport.session());
 
 let sistema=new modelo.Sistema({test:false});
 
@@ -69,34 +89,69 @@ app.post("/oneTap/callback",passport.authenticate("google-one-tap",{
 }));
 
 app.get("/agregarUsuario/:nick",function(request,response){
-  let nick=request.params.nick;
-  let res=sistema.agregarUsuario(nick);
-  response.send(res);
+    let nick=request.params.nick;
+    let res=sistema.agregarUsuario(nick);
+    response.send(res);
 });
 
-app.get("/obtenerUsuarios",function(request,response){
-  let res=sistema.obtenerUsuarios();
-  response.send(res);
+app.get("/obtenerUsuarios",haIniciado,function(request,response){
+    let res=sistema.obtenerUsuarios();
+    response.send(res);
 });
 
 app.get("/usuarioActivo/:nick",function(request,response){
-  let nick=request.params.nick;
-  let res=sistema.usuarioActivo(nick);
-  response.send({activo:res});
+    let nick=request.params.nick;
+    let res=sistema.usuarioActivo(nick);
+    response.send({activo:res});
 });
 
 app.get("/eliminarUsuario/:nick",function(request,response){
-  let nick=request.params.nick;
-  sistema.eliminarUsuario(nick);
-  response.send({nick:nick,eliminado:true});
+    let nick=request.params.nick;
+    sistema.eliminarUsuario(nick);
+    response.send({nick:nick,eliminado:true});
 });
 
 app.get("/numeroUsuarios",function(request,response){
-  let num=sistema.numeroUsuarios();
-  response.send({num:num});
+    let num=sistema.numeroUsuarios();
+    response.send({num:num});
+});
+
+app.post("/registrarUsuario",function(request,response){
+    sistema.registrarUsuario(request.body,function(res){
+        response.send({nick:res.email});
+    });
+});
+
+app.get("/confirmarUsuario/:email/:key",function(request,response){
+    let email=request.params.email;
+    let key=request.params.key;
+    sistema.confirmarUsuario({email:email,key:key},function(usr){
+        if(usr.email!==-1){
+            response.cookie("nick",usr.email);
+        }
+        response.redirect("/");
+    });
+});
+
+app.post("/loginUsuario",passport.authenticate("local",{
+    failureRedirect:"/fallo",
+    successRedirect:"/ok"
+}));
+
+app.get("/ok",haIniciado,function(request,response){
+    response.send({nick:request.user.email||request.user.nick});
+});
+
+app.get("/cerrarSesion",haIniciado,function(request,response){
+    let nick=request.user.nick||request.user.email;
+    request.logout(function(){});
+    response.redirect("/");
+    if(nick){
+        sistema.eliminarUsuario(nick);
+    }
 });
 
 app.listen(PORT,function(){
-  console.log("App está escuchando en el puerto "+PORT);
-  console.log("Ctrl+C para salir");
+    console.log("App está escuchando en el puerto "+PORT);
+    console.log("Ctrl+C para salir");
 });
