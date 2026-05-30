@@ -28,7 +28,7 @@ function ClienteRest(){
                     //cw.mostrarLogin();
                 }
                 else{
-                    console.log("El nick está ocupado");
+                    $("#errorRegistro").text("Este email ya está registrado.").show();
                 }
             },
             error:function(xhr,textStatus,errorThrown){
