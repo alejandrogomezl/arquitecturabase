@@ -15,15 +15,50 @@ function ControlWeb(){
     };
     this.comprobarSesion=function(){
         let nick=$.cookie("nick");
-        if(nick){ cw.mostrarMensaje("Bienvenido al sistema, "+nick); }
-        else{ cw.mostrarAgregarUsuario(); }
+        if(nick){ if(typeof google!=="undefined"){ google.accounts.id.cancel(); } cw.mostrarMensaje("Bienvenido al sistema, "+nick); }
+        else{ cw.mostrarRegistro(); }
     };
-    this.salir=function(){ $.removeCookie("nick"); location.reload(); };
+    this.salir=function(){
+        $.removeCookie("nick");
+        location.reload();
+        rest.cerrarSesion();
+    };
     this.mostrarMensaje=function(msg){
         $("#au").empty();
         let cadena='<div id="mMsg"><p>'+msg+'</p>';
         cadena+='<button id="btnSalir" class="btn btn-danger">Salir</button></div>';
         $("#au").append(cadena);
         $("#btnSalir").on("click",function(){ cw.salir(); });
+    };
+    this.limpiar=function(){
+        $("#registro").empty();
+    };
+    this.mostrarRegistro=function(){
+        $("#registro").load("./registro.html",function(){
+            $("#btnRegistro").on("click",function(){
+                let email=$("#email").val();
+                let password=$("#password").val();
+                if(email && password){
+                    rest.registrarUsuario(email,password);
+                }
+            });
+            $("#btnIrLogin").on("click",function(){
+                cw.mostrarLogin();
+            });
+        });
+    };
+    this.mostrarLogin=function(){
+        if($.cookie("nick")){ return true; }
+        $("#fmLogin").remove();
+        $("#registro").load("./login.html",function(){
+            $("#btnLogin").on("click",function(){
+                let email=$("#email").val();
+                let pwd=$("#pwd").val();
+                if(email && pwd){
+                    rest.loginUsuario(email,pwd);
+                    console.log(email+" "+pwd);
+                }
+            });
+        });
     };
 }
