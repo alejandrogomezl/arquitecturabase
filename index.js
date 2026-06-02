@@ -5,8 +5,11 @@ const cookieSession=require("cookie-session");
 const passport=require("passport");
 const LocalStrategy=require("passport-local").Strategy;
 const modelo=require("./servidor/modelo.js");
+const moduloWS=require("./servidor/servidorWS.js");
+const {Server}=require("socket.io");
 
 const app=express();
+const httpServer=require('http').Server(app);
 const PORT=process.env.PORT||3000;
 
 app.use(express.static(path.join(__dirname,"cliente")));
@@ -31,6 +34,8 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 let sistema=new modelo.Sistema({test:false});
+let ws=new moduloWS.WSServer();
+let io=new Server();
 
 require("./servidor/passport-setup.js")(sistema);
 
@@ -147,11 +152,19 @@ app.get("/cerrarSesion",haIniciado,function(request,response){
     request.logout(function(){});
     response.redirect("/");
     if(nick){
-        sistema.eliminarUsuario(nick);
+        sistema.cerrarSesion(nick);
     }
 });
 
-app.listen(PORT,function(){
-    console.log("App está escuchando en el puerto "+PORT);
-    console.log("Ctrl+C para salir");
+app.get("/logs",haIniciado,function(request,response){
+    sistema.obtenerLogs(function(logs){
+        response.send(logs);
+    });
 });
+
+httpServer.listen(PORT,()=>{
+    console.log(`App está escuchando en el puerto ${PORT}`);
+    console.log('Ctrl+C para salir');
+});
+io.listen(httpServer);
+ws.lanzarServidor(io,sistema);
