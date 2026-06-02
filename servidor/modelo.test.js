@@ -1,3 +1,7 @@
+jest.mock('./email.js', () => ({
+    enviarEmail: jest.fn().mockResolvedValue(undefined)
+}));
+
 const modelo=require("./modelo.js");
 
 describe('El sistema...',function(){
