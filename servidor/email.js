@@ -1,7 +1,6 @@
 const nodemailer=require("nodemailer");
 const gv=require('./gestorVariables.js');
-const url="http://localhost:3000/";
-//const url="tu-url-de-despliegue";
+const url=process.env.APP_URL||"http://localhost:3000/";
 
 let options={
     user:process.env.GMAIL_USER||"",
