@@ -41,6 +41,7 @@ function actualizar(coleccion,obj,callback){
 
 function CAD(){
     this.usuarios=null;
+    this.logs=null;
 
     this.conectar=async function(callback){
         let cad=this;
@@ -49,6 +50,7 @@ function CAD(){
         await client.connect();
         const database=client.db("sistema");
         cad.usuarios=database.collection("usuarios");
+        cad.logs=database.collection("logs");
         callback(database);
     };
 
@@ -73,6 +75,20 @@ function CAD(){
 
     this.actualizarUsuario=function(obj,callback){
         actualizar(this.usuarios,obj,callback);
+    };
+
+    this.insertarLog=function(log){
+        if(!this.logs){ return; }
+        this.logs.insertOne(log,function(err){
+            if(err){ console.log("Error insertando log:",err.message); }
+        });
+    };
+
+    this.obtenerLogs=function(callback){
+        if(!this.logs){ callback([]); return; }
+        this.logs.find({}).toArray(function(err,docs){
+            callback(err?[]:docs);
+        });
     };
 }
 
