@@ -28,7 +28,8 @@ function ClienteRest(){
                     //cw.mostrarLogin();
                 }
                 else{
-                    $("#errorRegistro").text("Este email ya está registrado.").show();
+                    console.log("Hay un usuario registrado con ese email");
+                    cw.mostrarModal("No se ha podido registrar el usuario");
                 }
             },
             error:function(xhr,textStatus,errorThrown){
@@ -47,6 +48,7 @@ function ClienteRest(){
                 if(data.nick!==-1){
                     console.log("Usuario "+data.nick+" ha sido registrado");
                     $.cookie("nick",data.nick);
+                    ws.email=data.nick;
                     cw.limpiar();
                     cw.mostrarMensaje("Bienvenido al sistema, "+data.nick);
                     //cw.mostrarLogin();
@@ -54,7 +56,7 @@ function ClienteRest(){
                 else{
                     console.log("No se pudo iniciar sesión");
                     cw.mostrarLogin();
-                    //cw.mostrarMensajeLogin("No se pudo iniciar sesión");
+                    cw.mostrarModal("No se ha podido iniciar sesión");
                 }
             },
             error:function(xhr,textStatus,errorThrown){

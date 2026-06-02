@@ -48,6 +48,12 @@ function ControlWeb(){
             });
         });
     };
+    this.mostrarModal=function(m){
+        $("#msg").remove();
+        let cadena="<div id='msg'>"+m+"</div>";
+        $('#mBody').append(cadena);
+        $('#miModal').modal();
+    };
     this.mostrarLogin=function(){
         if($.cookie("nick")){ return true; }
         $("#fmLogin").remove();
