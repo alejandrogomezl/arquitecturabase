@@ -21,11 +21,9 @@ function ClienteRest(){
             data:JSON.stringify({"email":email,"password":password}),
             success:function(data){
                 if(data.nick!==-1){
-                    console.log("Usuario "+data.nick+" ha sido registrado");
                     $.cookie("nick",data.nick);
                     cw.limpiar();
-                    cw.mostrarMensaje("Bienvenido al sistema, "+data.nick);
-                    //cw.mostrarLogin();
+                    cw.mostrarPanelPrincipal(data.nick);
                 }
                 else{
                     console.log("Hay un usuario registrado con ese email");
@@ -46,12 +44,10 @@ function ClienteRest(){
             data:JSON.stringify({"email":email,"password":password}),
             success:function(data){
                 if(data.nick!==-1){
-                    console.log("Usuario "+data.nick+" ha sido registrado");
                     $.cookie("nick",data.nick);
                     ws.email=data.nick;
                     cw.limpiar();
-                    cw.mostrarMensaje("Bienvenido al sistema, "+data.nick);
-                    //cw.mostrarLogin();
+                    cw.mostrarPanelPrincipal(data.nick);
                 }
                 else{
                     console.log("No se pudo iniciar sesión");
@@ -70,6 +66,11 @@ function ClienteRest(){
         $.getJSON("/cerrarSesion",function(){
             console.log("Sesión cerrada");
             $.removeCookie("nick");
+        });
+    };
+    this.obtenerProductos=function(){
+        $.getJSON("/productos",function(data){
+            cw.mostrarCatalogo(data);
         });
     };
 }
