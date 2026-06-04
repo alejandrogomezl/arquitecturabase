@@ -39,9 +39,18 @@ function actualizar(coleccion,obj,callback){
     );
 }
 
+const PRODUCTOS_SEED=[
+    {nombre:"Laptop Pro",descripcion:"Portátil de alto rendimiento",precio:999,icono:"💻"},
+    {nombre:"Auriculares BT",descripcion:"Auriculares inalámbricos con cancelación de ruido",precio:149,icono:"🎧"},
+    {nombre:"Ratón Ergonómico",descripcion:"Ratón inalámbrico con diseño ergonómico",precio:49,icono:"🖱️"},
+    {nombre:"Teclado Mecánico",descripcion:"Teclado mecánico retroiluminado",precio:89,icono:"⌨️"},
+    {nombre:"Monitor 4K",descripcion:"Monitor 27\" resolución 4K UHD",precio:399,icono:"🖥️"}
+];
+
 function CAD(){
     this.usuarios=null;
     this.logs=null;
+    this.productos=null;
 
     this.conectar=async function(callback){
         let cad=this;
@@ -51,7 +60,26 @@ function CAD(){
         const database=client.db("sistema");
         cad.usuarios=database.collection("usuarios");
         cad.logs=database.collection("logs");
+        cad.productos=database.collection("productos");
+        cad.seedProductos();
         callback(database);
+    };
+
+    this.seedProductos=async function(){
+        let cad=this;
+        if(!cad.productos){ return; }
+        let count=await cad.productos.countDocuments();
+        if(count===0){
+            await cad.productos.insertMany(PRODUCTOS_SEED);
+            console.log("Seed: 5 productos insertados");
+        }
+    };
+
+    this.obtenerProductos=function(callback){
+        if(!this.productos){ callback([]); return; }
+        this.productos.find({}).toArray(function(err,docs){
+            callback(err?[]:docs);
+        });
     };
 
     this.buscarOCrearUsuario=function(usr,callback){
