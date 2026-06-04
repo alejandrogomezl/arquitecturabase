@@ -51,6 +51,19 @@ function ControlWeb(){
         $("#registro").empty();
     };
 
+    this.mostrarMensajeConfirmacion=function(){
+        $("#registro").empty();
+        let html='<div class="alert alert-info mt-3" role="alert">';
+        html+='<h5>Cuenta creada correctamente</h5>';
+        html+='<p>Te hemos enviado un correo de confirmación. Por favor, revisa tu bandeja de entrada y pulsa el enlace para activar tu cuenta.</p>';
+        html+='<button id="btnIrLoginConf" class="btn btn-primary btn-sm">Ir al inicio de sesión</button>';
+        html+='</div>';
+        $("#registro").append(html);
+        $("#btnIrLoginConf").on("click",function(){
+            cw.mostrarLogin();
+        });
+    };
+
     this.mostrarRegistro=function(){
         $("#registro").load("./registro.html",function(){
             $("#btnRegistro").on("click",function(){

@@ -21,9 +21,8 @@ function ClienteRest(){
             data:JSON.stringify({"email":email,"password":password}),
             success:function(data){
                 if(data.nick!==-1){
-                    $.cookie("nick",data.nick);
                     cw.limpiar();
-                    cw.mostrarPanelPrincipal(data.nick);
+                    cw.mostrarMensajeConfirmacion();
                 }
                 else{
                     console.log("Hay un usuario registrado con ese email");
