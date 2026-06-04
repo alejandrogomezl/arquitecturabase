@@ -1,6 +1,5 @@
 const nodemailer=require("nodemailer");
 const gv=require('./gestorVariables.js');
-const url=process.env.APP_URL||"http://localhost:3000/";
 
 let options={
     user:process.env.GMAIL_USER||"",
@@ -12,16 +11,17 @@ let transporter=nodemailer.createTransport({
     auth:options
 });
 
-module.exports.enviarEmail=async function(direccion,key,men){
+module.exports.enviarEmail=async function(direccion,key,men,baseUrl){
     gv.obtenerOptions(async function(res){
         options=res;
         transporter=nodemailer.createTransport({service:'gmail',auth:options});
+        const link=baseUrl+"/confirmarUsuario/"+direccion+"/"+key;
         await transporter.sendMail({
             from:options.user,
             to:direccion,
             subject:men,
-            text:"Pulsa aquí para confirmar cuenta",
-            html:"<p>Bienvenido a Sistema</p><p><a href='"+url+"confirmarUsuario/"+direccion+"/"+key+"'>Pulsa aquí para confirmar cuenta</a></p>"
+            text:"Pulsa aquí para confirmar cuenta: "+link,
+            html:"<p>Bienvenido a Sistema</p><p><a href='"+link+"'>Pulsa aquí para confirmar cuenta</a></p>"
         });
     });
 };

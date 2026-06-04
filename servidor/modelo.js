@@ -53,7 +53,7 @@ function Sistema(test){
         });
     };
 
-    this.registrarUsuario=async function(obj,callback){
+    this.registrarUsuario=async function(obj,callback,baseUrl){
         let modelo=this;
         if(!obj.nick){
             obj.nick=obj.email;
@@ -69,7 +69,7 @@ function Sistema(test){
                     modelo.cad.insertarLog({"tipo-operacion":"registroUsuario","usuario":obj.email,"fecha-hora":new Date().toISOString()});
                     callback(res);
                 });
-                correo.enviarEmail(obj.email,key,"Confirmar cuenta").catch(err=>{
+                correo.enviarEmail(obj.email,key,"Confirmar cuenta",baseUrl).catch(err=>{
                     console.log("Error enviando email:",err.message);
                 });
             }
@@ -146,6 +146,10 @@ function Sistema(test){
         partida.jugadores.push(usr);
         this.cad.insertarLog({"tipo-operacion":"unirAPartida","usuario":email,"fecha-hora":new Date().toISOString()});
         return codigo;
+    };
+
+    this.obtenerProductos=function(callback){
+        this.cad.obtenerProductos(callback);
     };
 
     this.obtenerPartidasDisponibles=function(){

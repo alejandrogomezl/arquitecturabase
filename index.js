@@ -122,9 +122,10 @@ app.get("/numeroUsuarios",function(request,response){
 });
 
 app.post("/registrarUsuario",function(request,response){
+    const baseUrl=request.protocol+"://"+request.get("host");
     sistema.registrarUsuario(request.body,function(res){
         response.send({nick:res.email});
-    });
+    },baseUrl);
 });
 
 app.get("/confirmarUsuario/:email/:key",function(request,response){
@@ -159,6 +160,12 @@ app.get("/cerrarSesion",haIniciado,function(request,response){
 app.get("/logs",haIniciado,function(request,response){
     sistema.obtenerLogs(function(logs){
         response.send(logs);
+    });
+});
+
+app.get("/productos",haIniciado,function(request,response){
+    sistema.obtenerProductos(function(productos){
+        response.send(productos);
     });
 });
 
